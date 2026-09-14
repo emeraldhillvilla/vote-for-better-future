@@ -219,13 +219,9 @@
     outline-offset:3px;
   }
 
-  /* 重点入口：本次业主大会真正要做的事就是投票，给它一层浅蓝底和一个标记 */
-  .entry--live{
-    background:linear-gradient(0deg,var(--blue-soft),var(--blue-soft)) padding-box, var(--card);
-    border-color:#B6DFF4;
-    box-shadow:0 1px 2px rgba(10,63,92,.06), 0 14px 32px -18px rgba(7,106,153,.55);
-  }
-  .entry--live .chev{border-color:var(--blue-deep);}
+  /* 五条入口一律同款：不做「重点入口」高亮。
+     早先给投票指引加过浅蓝底 + 「先看这个」徽章，后来都去掉了——
+     五个入口是并列的五扇门，突出其中一扇反而让人以为其余的次要。 */
   .badge{
     flex:0 0 auto;
     padding:3px 10px;
@@ -514,7 +510,7 @@
     </li>
 
     <li>
-      <a class="entry entry--live" href="./guide/">
+      <a class="entry" href="./guide/">
         <span class="no" aria-hidden="true">02</span>
         <span class="txt">
           <span class="t">粤省事投票操作指引</span>
@@ -570,7 +566,7 @@
 <!-- ================= 页脚 ================= -->
 <footer class="foot">
   <p class="disclaim">本页由小区业主自行整理，仅在本小区业主范围内传阅，<b>不是政府或粤省事官方发布的文件</b>。</p>
-  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.9</p>
+  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.10</p>
 </footer>
 <!-- ================= 二维码查看器 =================
      用原生 <dialog>：showModal() 自带焦点陷阱和 Esc 关闭，且渲染在顶层，不必操心 z-index。
