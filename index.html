@@ -8,24 +8,26 @@
 <!-- ================= 分享卡片（微信/朋友圈按 Open Graph 抓取）=================
      微信服务端抓缩略图只认 JPG/PNG，不认 WebP，故此处指向 JPEG。
      微信按 URL 缓存卡片信息约 24 小时；要立刻换图换文案，最稳的做法是换文件名
-     （总入口用 share-card-hub.jpg，投票指引仍用它自己那张 share-card.jpg）。 -->
+     （总入口现用 share-card-hub-v2.jpg，投票指引仍用它自己那张 share-card.jpg。
+     2026-09-14 把总入口小图换成了「正式会议稳重版」（暮色照片），换图时必须改文件名，
+     否则微信仍按旧 URL 返回缓存里的老图。） -->
 <meta name="description" content="翡翠山 1-2 期别墅小区业主大会信息总览：业主大会公告与竞标材料公示、粤省事投票操作指引、外籍业主委托投票指南、业主大会群二维码、宣传视频。">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="翡翠山别墅业主大会">
 <meta property="og:title" content="翡翠山 1-2 期别墅小区 · 业主大会信息总览">
 <meta property="og:description" content="公告与竞标材料、投票指引、委托办法、业主群二维码、宣传视频，都从这里进。投票时间 2026 年 9 月 15 日 10:00 至 10 月 15 日 10:00。">
 <meta property="og:url" content="https://emeraldhillvilla.github.io/vote-for-better-future/">
-<meta property="og:image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub.jpg">
-<meta property="og:image:secure_url" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub.jpg">
+<meta property="og:image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub-v2.jpg">
+<meta property="og:image:secure_url" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub-v2.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1000">
 <meta property="og:image:height" content="1000">
 <meta property="og:image:alt" content="业主大会 信息总览">
-<meta itemprop="image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub.jpg">
+<meta itemprop="image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub-v2.jpg">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="翡翠山 1-2 期别墅小区 · 业主大会信息总览">
 <meta name="twitter:description" content="公告与竞标材料、投票指引、委托办法、业主群二维码、宣传视频，都从这里进。">
-<meta name="twitter:image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub.jpg">
+<meta name="twitter:image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card-hub-v2.jpg">
 
 <title>翡翠山别墅业主大会 · 信息总览</title>
 
@@ -631,7 +633,7 @@
 <!-- ================= 页脚 ================= -->
 <footer class="foot">
   <p class="disclaim">本页由小区业主自行整理，仅在本小区业主范围内传阅，<b>不是政府或粤省事官方发布的文件</b>。</p>
-  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.12</p>
+  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.13</p>
 </footer>
 <!-- ================= 二维码查看器 =================
      用原生 <dialog>：showModal() 自带焦点陷阱和 Esc 关闭，且渲染在顶层，不必操心 z-index。
