@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+
+<!-- ================= 分享卡片（微信/朋友圈按 Open Graph 抓取）=================
+     微信服务端抓缩略图只认 JPG/PNG，不认 WebP，故此处指向 JPEG。
+     微信会缓存卡片信息约 24 小时；要立刻换图换文案，最稳的做法是改文件名。 -->
+<meta name="description" content="大亚湾翡翠山别墅小区业主大会信息总入口：社区公告和公示合同、粤省事投票操作指引、外籍业主委托投票指南、业主大会群二维码、宣传视频。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="翡翠山别墅业主大会">
+<meta property="og:title" content="大亚湾翡翠山别墅小区 · 业主大会信息总入口">
+<meta property="og:description" content="公告、投票指引、委托办法、业主群二维码和宣传视频，都从这里进。投票时间：2026 年 9 月 15 日 10:00 至 10 月 15 日 10:00。">
+<meta property="og:url" content="https://emeraldhillvilla.github.io/vote-for-better-future/">
+<meta property="og:image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card.jpg">
+<meta property="og:image:secure_url" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1000">
+<meta property="og:image:height" content="1000">
+<meta itemprop="image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大亚湾翡翠山别墅小区 · 业主大会信息总入口">
+<meta name="twitter:description" content="公告、投票指引、委托办法、业主群二维码和宣传视频，都从这里进。">
+<meta name="twitter:image" content="https://emeraldhillvilla.github.io/vote-for-better-future/share-card.jpg">
+
+<title>翡翠山别墅业主大会 · 信息总入口</title>
+
+<style>
+  :root{
+    /* 配色与《粤省事投票操作指引》完全一致，两个页面属于同一套视觉语言。
+       取自粤省事 logo：蓝 #039FEA、黄绿 #ABCD05、灰 #898989。
+       logo 原色太亮，直接承担文字对比度不足（#039FEA 白底仅 2.6:1），
+       故文字与实心块一律用加深版，原色只用于描边与强调。 */
+    --paper:#F3F8FB;
+    --card:#FFFFFF;
+    --ink:#0A3F5C;
+    --ink-soft:#47606E;
+    --ink-mute:#6E8189;
+    --blue:#039FEA;
+    --blue-deep:#076A99;
+    --blue-soft:#E1F3FC;
+    --green:#ABCD05;
+    --green-soft:#F2F8DE;
+    --line:#D7E7EF;
+    --radius:18px;
+    --shadow:0 1px 2px rgba(10,63,92,.05), 0 10px 28px -18px rgba(10,63,92,.30);
+    --gutter:18px;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC",system-ui,-apple-system,sans-serif;
+    font-size:17.5px;
+    line-height:1.75;
+    letter-spacing:.01em;
+    text-rendering:optimizeLegibility;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,p,ol,li{margin:0;}
+  ol{padding:0;list-style:none;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ================= 首屏 =================
+     背景是小区实景，上面压两层深色蒙版：
+     一层整体加深保证白色文字达标，一层自下而上再加深让底部过渡到页面底色。 */
+  .hero{
+    position:relative;
+    isolation:isolate;
+    padding:calc(54px + env(safe-area-inset-top)) var(--gutter) 34px;
+    color:#fff;
+    overflow:hidden;
+  }
+  .hero-bg{
+    position:absolute;
+    inset:0;
+    z-index:-2;
+    background:url("./hero.jpg") center 38%/cover no-repeat;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    background:
+      linear-gradient(to bottom, rgba(6,32,48,.58) 0%, rgba(6,32,48,.62) 52%, rgba(6,32,48,.80) 100%),
+      linear-gradient(to right, rgba(6,32,48,.42), rgba(6,32,48,.10) 70%);
+  }
+  .hero-in{max-width:980px;margin:0 auto;}
+  .eyebrow{
+    display:inline-block;
+    padding:5px 13px;
+    border:1px solid rgba(255,255,255,.42);
+    border-radius:999px;
+    font-size:14px;
+    letter-spacing:.06em;
+    color:#EAF6FD;
+    backdrop-filter:blur(2px);
+  }
+  h1{
+    margin:16px 0 0;
+    font-size:clamp(27px,7.6vw,44px);
+    line-height:1.24;
+    letter-spacing:.01em;
+    font-weight:700;
+    text-shadow:0 1px 14px rgba(0,0,0,.30);
+  }
+  .lead{
+    margin:12px 0 0;
+    max-width:34em;
+    font-size:clamp(16.5px,4.3vw,19px);
+    line-height:1.7;
+    color:#DFF0F9;
+  }
+  .when{
+    margin:22px 0 0;
+    padding-top:16px;
+    border-top:1px solid rgba(255,255,255,.26);
+    /* 不设 max-width：整句在宽屏能一行放下，之前在 34em（约 595px）处被截断，
+       导致「逾期无法补投。」被挤成第二行的孤儿行。窄屏仍按标点自然换行。 */
+    font-size:clamp(15.5px,4vw,17.5px);
+    color:#EAF6FD;
+  }
+  .when b{color:#fff;font-weight:600;}
+  /* 每个日期各自成为一个不可断开的单位，换行只发生在标点处 */
+  .when .d{white-space:nowrap;}
+
+  /* ================= 入口列表 =================
+     长者为主，一行一扇门：编号 → 标题 → 一句话说明 → 箭头。
+     触摸目标高度不低于 92px，标题 19px 起。 */
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:30px var(--gutter) calc(40px + env(safe-area-inset-bottom));
+  }
+  .sec-title{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.08em;
+    /* 用加深版而不是 --ink-mute：后者在页面底色上只有 3.8:1，达不到正文标准 */
+    color:var(--ink-soft);
+    margin-bottom:12px;
+  }
+  .sec-title::before{
+    content:"";
+    width:18px;height:3px;
+    border-radius:2px;
+    background:var(--green);   /* 品牌黄绿，仅作装饰性分隔，不承担文字对比度 */
+  }
+  .entries{display:grid;gap:12px;}
+
+  .entry{
+    display:flex;
+    /* 顶对齐而不是居中：长标题会占两三行，编号跟着标题走才读得出「第几条」 */
+    align-items:flex-start;
+    gap:14px;
+    min-height:92px;
+    padding:16px 18px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  }
+  .entry .no{
+    flex:0 0 auto;
+    width:44px;
+    padding-top:2px;      /* 让 24px 的编号与 19px 标题在视觉中心上对齐 */
+    font-size:24px;
+    font-weight:700;
+    line-height:1;
+    letter-spacing:-.02em;
+    /* 用加深版：#039FEA 在白底只有 2.94:1，24px 粗体按大字标准也要 3:1，差一点点 */
+    color:var(--blue-deep);
+    font-variant-numeric:tabular-nums;
+  }
+  .entry .txt{flex:1 1 auto;min-width:0;}
+  .entry .t{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    font-size:19px;
+    font-weight:600;
+    line-height:1.45;
+    color:var(--ink);
+  }
+  .entry .d{
+    display:block;
+    margin-top:5px;
+    font-size:16px;
+    line-height:1.62;
+    color:var(--ink-soft);
+  }
+  /* 右箭头：用边框拼，避免额外图片请求 */
+  .entry .chev{
+    flex:0 0 auto;
+    align-self:center;
+    width:10px;height:10px;
+    border-right:2.4px solid var(--ink-mute);
+    border-bottom:2.4px solid var(--ink-mute);
+    transform:rotate(-45deg);
+    margin-right:3px;
+  }
+  /* 可点状态的反应 */
+  .entry[href]:active{transform:scale(.988);}
+  .entry[href]:hover{border-color:#B9D8E8;}
+  .entry:focus-visible{
+    outline:3px solid var(--blue-deep);
+    outline-offset:3px;
+  }
+
+  /* 重点入口：本次业主大会真正要做的事就是投票，给它一层浅蓝底和一个标记 */
+  .entry--live{
+    background:linear-gradient(0deg,var(--blue-soft),var(--blue-soft)) padding-box, var(--card);
+    border-color:#B6DFF4;
+    box-shadow:0 1px 2px rgba(10,63,92,.06), 0 14px 32px -18px rgba(7,106,153,.55);
+  }
+  .entry--live .chev{border-color:var(--blue-deep);}
+  .badge{
+    flex:0 0 auto;
+    padding:3px 10px;
+    border-radius:999px;
+    background:var(--blue-deep);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.04em;
+    white-space:nowrap;
+  }
+  /* 尚未上线：保留条目让业主知道后面还会有什么，同时明确不可点。
+     状态标签强制单独占一行——否则标题长短不同，会出现有的同行、有的换行，
+     同一份列表里不一致，反而更难扫读。 */
+  .entry--soon{
+    background:#FBFDFE;
+    border-style:dashed;
+    box-shadow:none;
+  }
+  .entry--soon .t{display:block;color:#4C6472;}
+  .entry--soon .no{color:#A9BFCB;}
+  /* 说明文字不做淡化处理：ink-mute 在浅白底上只有 3.99:1，长者更难读。
+     「未上线」的语义靠虚线边框、灰色编号和状态标签表达即可。 */
+  .entry--soon .d{color:var(--ink-soft);margin-top:7px;}
+  .entry--soon .chev{display:none;}
+  .badge--soon{
+    display:block;
+    width:fit-content;
+    margin-top:8px;
+    background:var(--green-soft);
+    color:#5C7100;
+    border:1px solid #DCE8A8;
+  }
+
+  /* ================= 页脚 ================= */
+  .foot{
+    max-width:980px;
+    margin:0 auto;
+    padding:0 var(--gutter) calc(38px + env(safe-area-inset-bottom));
+    text-align:center;
+  }
+  .disclaim{
+    padding:16px 18px;
+    background:var(--green-soft);
+    border:1px solid #E3EDC2;
+    border-radius:var(--radius);
+    font-size:15px;
+    line-height:1.7;
+    color:#4A5A12;
+  }
+  .disclaim b{color:#3D4A0D;}
+  .ver{
+    margin-top:16px;
+    font-size:13.5px;
+    color:var(--ink-mute);
+  }
+
+  /* ================= 首屏入场动画 =================
+     纯 CSS，不依赖脚本：就算 JS 全军覆没，内容也是可见的。
+     只做一次淡入上移，不加滚动触发。 */
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .hero-in > *{animation:rise .55s cubic-bezier(.22,.7,.28,1) both;}
+  .hero-in > *:nth-child(2){animation-delay:.06s;}
+  .hero-in > *:nth-child(3){animation-delay:.12s;}
+  .hero-in > *:nth-child(4){animation-delay:.18s;}
+
+  /* ================= 断点 ================= */
+  /* 中屏：加大留白，首屏更高 */
+  @media (min-width:560px){
+    :root{--gutter:28px;}
+    .hero{padding-top:calc(72px + env(safe-area-inset-top));padding-bottom:44px;}
+    .wrap{padding-top:38px;}
+  }
+  /* 宽屏：入口排两列。980px 容器下每列约 470px，仍够放 19px 标题 */
+  @media (min-width:860px){
+    .hero{padding-top:calc(88px + env(safe-area-inset-top));padding-bottom:56px;}
+    .entries{grid-template-columns:1fr 1fr;}
+    .entry{min-height:104px;}
+  }
+  /* 窄屏微调：编号列收窄，标题略降，保证一行标题不被挤断 */
+  @media (max-width:360px){
+    .entry{gap:11px;padding-left:15px;padding-right:15px;}
+    .entry .no{width:36px;font-size:21px;}
+    .entry .t{font-size:17.5px;}
+    .entry .d{font-size:15px;}
+  }
+
+  /* 尊重系统的「减少动态效果」 */
+  @media (prefers-reduced-motion:reduce){
+    .hero-in > *{animation:none;}
+    .entry{transition:none;}
+    .entry[href]:active{transform:none;}
+  }
+  /* 打印：去掉背景图和动画，白底黑字，把链接地址显出来 */
+  @media print{
+    .hero{background:none;color:#000;padding-top:0;}
+    .hero-bg,.hero::before{display:none;}
+    .hero-in > *{animation:none;}
+    h1{text-shadow:none;}
+    .lead,.when{color:#000;}
+    .eyebrow{border-color:#999;color:#000;backdrop-filter:none;}
+    .entry{box-shadow:none;break-inside:avoid;}
+    .entry--soon{display:none;}
+    .foot{padding-bottom:0;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 首屏 ================= -->
+<header class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-in">
+    <p class="eyebrow">大亚湾翡翠山别墅小区</p>
+    <h1>业主大会信息总入口</h1>
+    <p class="lead">本次业主大会的公告、投票指引、委托办法和相关资料，都从这里进。</p>
+    <p class="when"><b>投票通道</b>：<span class="d">2026 年 9 月 15 日 10:00 开放</span>，<span class="d">10 月 15 日 10:00 截止</span>，逾期无法补投。</p>
+  </div>
+</header>
+
+<!-- ================= 入口列表 =================
+     要新增一个入口，复制下面任意一个 <li> 整块即可：
+       · 已上线：<a class="entry" href="链接"> … </a>（必须带 href 才可点、才能进键盘 Tab 序列）
+       · 未上线：不写 href，并给 li 加 class="entry entry--soon"，右侧加 <span class="badge badge--soon">即将上线</span>
+     编号 .no 是装饰性序号，改顺序时记得同步改。 -->
+<main class="wrap">
+  <h2 class="sec-title">从这里进</h2>
+  <ol class="entries">
+
+    <li>
+      <!-- 待补：山河社区公告和公示合同的链接 -->
+      <a class="entry entry--soon">
+        <span class="no" aria-hidden="true">01</span>
+        <span class="txt">
+          <span class="t">山河社区公告和公示合同<span class="badge badge--soon">即将上线</span></span>
+          <span class="d">社区发布的公告、公示文件与相关合同，可随时查阅。</span>
+        </span>
+        <span class="chev" aria-hidden="true"></span>
+      </a>
+    </li>
+
+    <li>
+      <a class="entry entry--live" href="./guide/">
+        <span class="no" aria-hidden="true">02</span>
+        <span class="txt">
+          <span class="t">粤省事投票操作指引<span class="badge">先看这个</span></span>
+          <span class="d">从打开粤省事到提交投票，12 步图解，每步都圈出该点哪里。</span>
+        </span>
+        <span class="chev" aria-hidden="true"></span>
+      </a>
+    </li>
+
+    <li>
+      <!-- 待补：外籍业主委托投票指南的链接 -->
+      <a class="entry entry--soon">
+        <span class="no" aria-hidden="true">03</span>
+        <span class="txt">
+          <span class="t">外籍业主委托投票指南<span class="badge badge--soon">即将上线</span></span>
+          <span class="d">人不在国内或不方便亲自投票时，如何办理书面委托。</span>
+        </span>
+        <span class="chev" aria-hidden="true"></span>
+      </a>
+    </li>
+
+    <li>
+      <!-- 待补：业主大会群二维码的链接或页面 -->
+      <a class="entry entry--soon">
+        <span class="no" aria-hidden="true">04</span>
+        <span class="txt">
+          <span class="t">翡翠山别墅业主大会群二维码<span class="badge badge--soon">即将上线</span></span>
+          <span class="d">扫码加入业主大会微信群，第一时间收到通知。</span>
+        </span>
+        <span class="chev" aria-hidden="true"></span>
+      </a>
+    </li>
+
+    <li>
+      <!-- 待补：宣传视频的链接 -->
+      <a class="entry entry--soon">
+        <span class="no" aria-hidden="true">05</span>
+        <span class="txt">
+          <span class="t">翡翠山别墅业主大会宣传视频<span class="badge badge--soon">即将上线</span></span>
+          <span class="d">几分钟了解本次业主大会要议什么、为什么重要。</span>
+        </span>
+        <span class="chev" aria-hidden="true"></span>
+      </a>
+    </li>
+
+  </ol>
+</main>
+
+<!-- ================= 页脚 ================= -->
+<footer class="foot">
+  <p class="disclaim">本页由小区业主自行整理，仅在本小区业主范围内传阅，<b>不是政府或粤省事官方发布的文件</b>。</p>
+  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.0</p>
+</footer>
+
+</body>
+</html>
