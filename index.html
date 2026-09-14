@@ -191,13 +191,15 @@
     margin:0 auto;
     padding:30px var(--gutter) calc(40px + env(safe-area-inset-bottom));
   }
+  /* 这一行现在是一句「指令」，不再只是分区标签，所以字号提到 16px、
+     字距从 .08em 收到 .02em——字距拉开只适合短标签，长者读整句时反而更费劲。 */
   .sec-title{
     display:flex;
     align-items:center;
     gap:9px;
-    font-size:15px;
+    font-size:16px;
     font-weight:600;
-    letter-spacing:.08em;
+    letter-spacing:.02em;
     /* 用加深版而不是 --ink-mute：后者在页面底色上只有 3.8:1，达不到正文标准 */
     color:var(--ink-soft);
     margin-bottom:12px;
@@ -249,23 +251,59 @@
   .entry .d{
     display:block;
     margin-top:5px;
-    font-size:16px;
+    /* 16px 对长者偏小，提到 17px（正文基准是 17.5px）；
+       ≤360px 的小屏在下面的断点里单独给 16px */
+    font-size:17px;
     line-height:1.62;
     color:var(--ink-soft);
   }
-  /* 右箭头：用边框拼，避免额外图片请求 */
-  .entry .chev{
-    flex:0 0 auto;
-    align-self:center;
-    width:10px;height:10px;
-    border-right:2.4px solid var(--ink-mute);
-    border-bottom:2.4px solid var(--ink-mute);
-    transform:rotate(-45deg);
-    margin-right:3px;
+  /* 明确的行动提示。
+     原先每张卡片右边只有一个用边框拼的「›」——iOS 用户一眼就懂，长者们普遍不认。
+     图标解决的是「吸引力」，解决不了「可点性」，所以把这件事写成字：
+     一个实心胶囊「点击查看 ›」。卡片整体仍是链接，点击区没有变小，
+     胶囊只是替页面把「能点」说出口。
+     白字压 --blue-deep 实测 5.94:1，达到正文 4.5:1 的标准。 */
+  .entry .cta{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin-top:11px;
+    padding:7px 15px;
+    border-radius:999px;
+    background:var(--blue-deep);
+    color:#fff;
+    font-size:15.5px;
+    font-weight:600;
+    line-height:1.3;
+    letter-spacing:.02em;
+    /* 系统字号放大时也不许把「点击查看」折成两行，宁可整个胶囊变宽 */
+    white-space:nowrap;
   }
-  /* 可点状态的反应 */
-  .entry[href]:active{transform:scale(.988);}
+  /* 胶囊里的小箭头，与文字一起构成「点击查看 ›」；用边框拼，省一个图片请求 */
+  .entry .cta::after{
+    content:"";
+    width:7px;height:7px;
+    border-right:2.2px solid currentColor;
+    border-bottom:2.2px solid currentColor;
+    transform:rotate(-45deg);
+  }
+  /* 按下去要立刻有反应。原来只缩了 0.988，肉眼几乎看不出；
+     而 01/03 是跨仓库页面、要联网加载，长者按下去一两秒没动静就会以为坏了，
+     于是反复戳，最后同时开出好几个页面。这里改成整块明显变色。 */
+  .entry[href]:active{
+    background:#DCEDF8;
+    border-color:#8FC4DE;
+    transform:scale(.994);
+  }
   .entry[href]:hover{border-color:#B9D8E8;}
+  /* 点击后的回执：由页面末尾的脚本加上 .is-opening。
+     换成 --ink-soft 而不是浅灰，白字在上面是 6.63:1，浅灰只有 4.06:1 不达标 */
+  .entry.is-opening{
+    background:#EDF6FC;
+    border-color:#A9CFE4;
+  }
+  .entry.is-opening .cta{background:var(--ink-soft);}
+  .entry.is-opening .cta::after{display:none;}
   .entry:focus-visible{
     outline:3px solid var(--blue-deep);
     outline-offset:3px;
@@ -298,7 +336,7 @@
   /* 说明文字不做淡化处理：ink-mute 在浅白底上只有 3.99:1，长者更难读。
      「未上线」的语义靠虚线边框、灰色编号和状态标签表达即可。 */
   .entry--soon .d{color:var(--ink-soft);margin-top:7px;}
-  .entry--soon .chev{display:none;}
+  .entry--soon .cta{display:none;}
   .badge--soon{
     display:block;
     width:fit-content;
@@ -499,12 +537,14 @@
     .entries{grid-template-columns:1fr 1fr;}
     .entry{min-height:104px;}
   }
-  /* 窄屏微调：编号列收窄，标题略降，保证一行标题不被挤断 */
+  /* 窄屏微调：编号列收窄，标题略降，保证一行标题不被挤断。
+     说明文字仍保 16px，不再跟着标题一起往下掉——长者主要靠这句看懂这条是什么。 */
   @media (max-width:360px){
     .entry{gap:11px;padding-left:15px;padding-right:15px;}
     .entry .no{width:36px;font-size:21px;}
     .entry .t{font-size:17.5px;}
-    .entry .d{font-size:15px;}
+    .entry .d{font-size:16px;}
+    .entry .cta{font-size:15px;padding:7px 14px;}
   }
 
   /* 尊重系统的「减少动态效果」 */
@@ -522,6 +562,9 @@
     .lead,.when{color:#000;}
     .eyebrow{border-color:#999;color:#000;backdrop-filter:none;}
     .entry{box-shadow:none;break-inside:avoid;}
+    /* 打印时浏览器默认不输出背景色，实心胶囊会变成白底白字，「点击查看」直接消失。
+       而且纸上也点不了，这行提示本来就没有意义，索性收掉。 */
+    .entry .cta{display:none;}
     .entry--soon{display:none;}
     .foot{padding-bottom:0;}
   }
@@ -561,7 +604,8 @@
        · 未上线：不写 href，并给 li 加 class="entry entry--soon"，右侧加 <span class="badge badge--soon">即将上线</span>
      编号 .no 是装饰性序号，改顺序时记得同步改。 -->
 <main class="wrap">
-  <h2 class="sec-title">从这里进</h2>
+  <!-- 标题里的「5 项」要和列表实际条数一致，增删条目时记得同步改 -->
+  <h2 class="sec-title">下面 5 项，点一下就能打开</h2>
   <ol class="entries">
 
     <li>
@@ -571,8 +615,8 @@
         <span class="txt">
           <span class="t">业主大会公告与竞标材料公示</span>
           <span class="d">会议公告与议程安排，以及五家候选物业服务企业的竞标材料。</span>
+          <span class="cta">点击查看</span>
         </span>
-        <span class="chev" aria-hidden="true"></span>
       </a>
     </li>
 
@@ -582,8 +626,8 @@
         <span class="txt">
           <span class="t">粤省事投票操作指引</span>
           <span class="d">从打开粤省事到提交投票，12 步图解，每步都圈出该点哪里。</span>
+          <span class="cta">点击查看</span>
         </span>
-        <span class="chev" aria-hidden="true"></span>
       </a>
     </li>
 
@@ -594,8 +638,8 @@
         <span class="txt">
           <span class="t">外籍业主委托投票指南</span>
           <span class="d">人不在国内或不方便亲自投票时，如何办理书面委托。</span>
+          <span class="cta">点击查看</span>
         </span>
-        <span class="chev" aria-hidden="true"></span>
       </a>
     </li>
 
@@ -606,9 +650,9 @@
         <span class="no" aria-hidden="true">04</span>
         <span class="txt">
           <span class="t">翡翠山别墅业主大会群二维码</span>
-          <span class="d">点开看二维码，在微信里长按识别即可入群。二维码 9 月 21 日前有效。</span>
+          <span class="d">在微信里长按识别即可入群。二维码 9 月 21 日前有效。</span>
+          <span class="cta">点击查看</span>
         </span>
-        <span class="chev" aria-hidden="true"></span>
       </a>
     </li>
 
@@ -622,8 +666,8 @@
         <span class="txt">
           <span class="t">翡翠山别墅业主大会宣传视频</span>
           <span class="d">几分钟了解本次业主大会要议什么、为什么重要。</span>
+          <span class="cta">点击查看</span>
         </span>
-        <span class="chev" aria-hidden="true"></span>
       </a>
     </li>
 
@@ -633,7 +677,7 @@
 <!-- ================= 页脚 ================= -->
 <footer class="foot">
   <p class="disclaim">本页由小区业主自行整理，仅在本小区业主范围内传阅，<b>不是政府或粤省事官方发布的文件</b>。</p>
-  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.13</p>
+  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.14</p>
 </footer>
 <!-- ================= 二维码查看器 =================
      用原生 <dialog>：showModal() 自带焦点陷阱和 Esc 关闭，且渲染在顶层，不必操心 z-index。
@@ -935,6 +979,48 @@
 
   box.hidden = false;   // 只有脚本正常跑起来，这一块才出现
   tick();
+})();
+</script>
+
+<script>
+/* 点下去之后的「正在打开…」回执。
+   01/03 指向本站另一个仓库、05 指向视频号，都要联网加载，长者按下去一两秒没动静
+   会以为没点中，于是反复戳，最后同时开出好几个页面。这里在按下后立刻改胶囊文案。
+   三个考虑：
+   - 只处理真正会跳转的条目。04 是弹层，它自己的处理函数会 preventDefault，
+     所以用 e.defaultPrevented 判断，不去硬编码 id——以后再添弹层条目也不用改这里。
+   - 用 document 上的冒泡监听，保证排在 04 那个元素级监听之后执行。
+   - 浏览器「返回」时页面可能从 bfcache 直接恢复，文案会僵在「正在打开…」，
+     所以监听 pageshow 复位。 */
+(function () {
+  var TIP = '正在打开…';      // 与 .cta 里的初始文案一致，复位时要用
+  var IDLE = '点击查看';
+  var RESET_MS = 12000;       // 万一没跳走（断网、被拦），别一直挂着
+
+  function reset() {
+    Array.prototype.forEach.call(document.querySelectorAll('.entries .cta'), function (c) {
+      c.textContent = IDLE;
+      var a = c.closest('.entry');
+      if (a) { a.classList.remove('is-opening'); }
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    // 已被弹层接管，或用户按的是「新窗口打开」的组合键，都不算普通跳转
+    if (e.defaultPrevented) { return; }
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) { return; }
+    var target = e.target;
+    if (!target || !target.closest) { return; }
+    var link = target.closest('.entries a.entry[href]');
+    if (!link) { return; }
+    var cta = link.querySelector('.cta');
+    if (!cta) { return; }
+    link.classList.add('is-opening');
+    cta.textContent = TIP;
+    window.setTimeout(reset, RESET_MS);
+  });
+
+  window.addEventListener('pageshow', reset);
 })();
 </script>
 
