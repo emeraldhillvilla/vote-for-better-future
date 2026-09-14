@@ -258,6 +258,152 @@
     border:1px solid #DCE8A8;
   }
 
+  /* ================= 二维码查看器（弹层） =================
+     用原生 <dialog> + showModal()：焦点陷阱、Esc 关闭、顶层渲染都由浏览器负责，
+     不用自己造模态框、也不用猜 z-index。inset:0 铺满全屏，点深色空白处也能关。
+     不支持 dialog 的旧环境不会执行下面的脚本，条目上的 href 会直接打开图片。 */
+  dialog.viewer{
+    position:fixed;
+    inset:0;
+    width:auto;
+    height:auto;
+    max-width:none;
+    max-height:none;
+    margin:0;
+    padding:0;
+    border:0;
+    background:#071C29;
+    color:#fff;
+    overflow:hidden;
+  }
+  dialog.viewer[open]{
+    display:flex;
+    flex-direction:column;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  dialog.viewer::backdrop{background:rgba(4,16,24,.9);}
+
+  .viewer-top{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 14px 10px 18px;
+  }
+  .viewer-title{
+    flex:1 1 auto;
+    min-width:0;
+    font-size:17px;
+    font-weight:600;
+    color:#EAF6FD;
+  }
+  .viewer-close{
+    flex:0 0 auto;
+    width:48px;height:48px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.30);
+    background:rgba(255,255,255,.12);
+    color:#fff;
+    font-size:26px;
+    line-height:1;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+  }
+
+  /* 图片舞台：吃掉全部手势，不让浏览器自带的滚动和缩放开抢 */
+  .viewer-stage{
+    flex:1 1 auto;
+    position:relative;
+    overflow:hidden;
+    touch-action:none;
+    overscroll-behavior:contain;
+    cursor:grab;
+  }
+  .viewer-stage.is-panning{cursor:grabbing;}
+  /* 用绝对定位 + inset:0 + margin:auto 来做「完整装进舞台」。
+     起初用的是 grid + place-items:center + max-height:100%，实测不行：
+     网格行是 auto 尺寸时，百分比 max-height 解析不出来，图片按宽度撑到 911px、
+     纵向溢出舞台（舞台只有 612px 高），整张海报上下被裁掉。
+     绝对定位的包含块是舞台的确定高度，百分比才靠得住。 */
+  .viewer-stage img{
+    position:absolute;
+    inset:0;
+    margin:auto;
+    width:auto;
+    height:auto;
+    max-width:100%;
+    max-height:100%;
+    border-radius:10px;
+    transform-origin:center center;
+    user-select:none;
+    -webkit-user-drag:none;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+  }
+  /* 只有按钮/滚轮/双击缩放才补间，拖拽时不能加，否则跟手感变差 */
+  .viewer-stage img.is-smooth{transition:transform .16s ease-out;}
+
+  .viewer-bottom{
+    flex:0 0 auto;
+    padding:12px 18px calc(18px + env(safe-area-inset-bottom));
+    text-align:center;
+  }
+  .viewer-hint{
+    margin-bottom:12px;
+    font-size:15px;
+    line-height:1.6;
+    color:#BFD8E6;
+  }
+  .viewer-hint b{color:#fff;font-weight:600;}
+
+  .viewer-tools{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+  }
+  .viewer-tools button{
+    min-width:56px;
+    height:52px;
+    padding:0 16px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.30);
+    background:rgba(255,255,255,.12);
+    color:#fff;
+    font-size:22px;
+    font-weight:600;
+    line-height:1;
+    cursor:pointer;
+  }
+  .viewer-tools button:active{background:rgba(255,255,255,.24);}
+  .viewer-tools button[disabled]{opacity:.38;cursor:default;}
+  .viewer-close:focus-visible,
+  .viewer-tools button:focus-visible{
+    outline:3px solid #7FD2F5;
+    outline-offset:2px;
+  }
+  .viewer-level{
+    min-width:76px;
+    font-size:16px;
+    font-variant-numeric:tabular-nums;
+    color:#EAF6FD;
+  }
+  .viewer-fit{font-size:16px;}
+
+  /* 弹层打开时锁住页面滚动。
+     首选 :has() —— 纯声明式，弹层一关自动失效，不依赖任何异步事件；
+     再挂一个 .viewer-open 类作为旧内核（不支持 :has()）的兜底。 */
+  html:has(dialog.viewer[open]),
+  html.viewer-open{overflow:hidden;}
+
+  @media (prefers-reduced-motion:reduce){
+    .viewer-stage img.is-smooth{transition:none;}
+  }
+  @media print{
+    dialog.viewer{display:none !important;}
+  }
+
   /* ================= 页脚 ================= */
   .foot{
     max-width:980px;
@@ -389,12 +535,13 @@
     </li>
 
     <li>
-      <!-- 待补：业主大会群二维码的链接或页面 -->
-      <a class="entry entry--soon">
+      <!-- 带 href：没有脚本或浏览器不支持 <dialog> 时，直接打开图片；
+           支持时由下方脚本拦截，改为弹层查看 -->
+      <a class="entry" href="./group-qr.png" id="qrEntry">
         <span class="no" aria-hidden="true">04</span>
         <span class="txt">
-          <span class="t">翡翠山别墅业主大会群二维码<span class="badge badge--soon">即将上线</span></span>
-          <span class="d">扫码加入业主大会微信群，第一时间收到通知。</span>
+          <span class="t">翡翠山别墅业主大会群二维码</span>
+          <span class="d">点开看二维码，在微信里长按识别即可入群。二维码 9 月 21 日前有效。</span>
         </span>
         <span class="chev" aria-hidden="true"></span>
       </a>
@@ -418,8 +565,233 @@
 <!-- ================= 页脚 ================= -->
 <footer class="foot">
   <p class="disclaim">本页由小区业主自行整理，仅在本小区业主范围内传阅，<b>不是政府或粤省事官方发布的文件</b>。</p>
-  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.0</p>
+  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.1</p>
 </footer>
+<!-- ================= 二维码查看器 =================
+     用原生 <dialog>：showModal() 自带焦点陷阱和 Esc 关闭，且渲染在顶层，不必操心 z-index。
+     底部工具栏是手势之外的另一条路——单靠双指缩放，长者不一定摸得到。 -->
+<dialog class="viewer" id="qrViewer" aria-labelledby="qrViewerTitle">
+  <div class="viewer-top">
+    <p class="viewer-title" id="qrViewerTitle">翡翠山别墅业主大会群二维码</p>
+    <button class="viewer-close" type="button" data-viewer-close aria-label="关闭">×</button>
+  </div>
+
+  <div class="viewer-stage" id="qrStage">
+    <img id="qrImage" src="./group-qr.png" width="750" height="1334" loading="lazy"
+         alt="翡翠山别墅业主大会群二维码海报：群二维码 9 月 21 日前有效，群聊名称为翡翠山别墅换届物业业主大会群">
+  </div>
+
+  <div class="viewer-bottom">
+    <p class="viewer-hint">在微信里<b>长按二维码</b>，选「识别图中二维码」即可入群</p>
+    <div class="viewer-tools">
+      <button type="button" data-zoom="out" aria-label="缩小">−</button>
+      <output class="viewer-level" id="qrLevel" aria-live="off" aria-label="当前缩放比例">100%</output>
+      <button type="button" data-zoom="in" aria-label="放大">＋</button>
+      <button type="button" class="viewer-fit" data-zoom="reset">适应屏幕</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+/* 二维码查看器：放大 / 缩小 / 拖动 / 双指缩放 / 双击切换。
+   条目本身带 href，所以脚本失效或浏览器不支持 <dialog> 时，会自动退回直接打开图片。 */
+(function () {
+  var entry = document.getElementById('qrEntry');
+  var dlg   = document.getElementById('qrViewer');
+  if (!entry || !dlg || typeof dlg.showModal !== 'function') { return; }
+
+  var stage = document.getElementById('qrStage');
+  var img   = document.getElementById('qrImage');
+  var level = document.getElementById('qrLevel');
+  var closeBtn = dlg.querySelector('[data-viewer-close]');
+  var zoomBtns = dlg.querySelectorAll('[data-zoom]');
+
+  /* 1 = 适应屏幕；不允许缩得比屏幕还小，没有意义。上限 5 倍足够看清海报上的小字。 */
+  var MIN = 1, MAX = 5;
+  var scale = 1, tx = 0, ty = 0;   // tx/ty 是相对舞台中心的像素位移
+  var fitW = 0, fitH = 0;          // 适应屏幕时的显示尺寸，缩放的基准
+  var moved = false;               // 区分「点空白关闭」和「拖拽结束」
+
+  function measure() {
+    // 先清掉变换量出原始（适应屏幕）尺寸；必须在弹层已显示之后调用，否则是 0
+    var prev = img.style.transform;
+    img.style.transform = 'none';
+    fitW = img.clientWidth;
+    fitH = img.clientHeight;
+    img.style.transform = prev;
+  }
+
+  function clamp() {
+    var w = fitW * scale, h = fitH * scale;
+    // 图比舞台大时，边缘不许拖进舞台内部；比舞台小时保持居中
+    var maxX = Math.max(0, (w - stage.clientWidth) / 2);
+    var maxY = Math.max(0, (h - stage.clientHeight) / 2);
+    tx = Math.min(maxX, Math.max(-maxX, tx));
+    ty = Math.min(maxY, Math.max(-maxY, ty));
+  }
+
+  function render() {
+    clamp();
+    img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    level.textContent = Math.round(scale * 100) + '%';
+    Array.prototype.forEach.call(zoomBtns, function (b) {
+      var z = b.getAttribute('data-zoom');
+      if (z === 'in')  { b.disabled = scale >= MAX - 0.001; }
+      if (z === 'out') { b.disabled = scale <= MIN + 0.001; }
+    });
+  }
+
+  /* 以舞台上某点为锚点缩放到 to。vx/vy 是该点相对舞台中心的像素偏移。
+     屏幕位置 = 中心 + 位移 + 缩放 × 图上偏移，要让同一个图点仍停在原处，
+     位移要按 (1 - 缩放比) 修正——这就是下面两行的来历。 */
+  function zoomTo(to, vx, vy) {
+    to = Math.min(MAX, Math.max(MIN, to));
+    if (Math.abs(to - scale) < 0.001) { return; }
+    var k = to / scale;
+    tx = vx - k * (vx - tx);
+    ty = vy - k * (vy - ty);
+    scale = to;
+    render();
+  }
+
+  /* 只有按钮、滚轮、双击这几种缩放才补间；拖拽时必须瞬时，否则跟手感变差 */
+  function smooth(fn) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { fn(); return; }
+    img.classList.add('is-smooth');
+    fn();
+    window.setTimeout(function () { img.classList.remove('is-smooth'); }, 240);
+  }
+
+  function reset() { scale = 1; tx = 0; ty = 0; smooth(render); }
+  function stageOffset(cx, cy) {
+    var r = stage.getBoundingClientRect();
+    return { x: cx - (r.left + r.width / 2), y: cy - (r.top + r.height / 2) };
+  }
+
+  /* ---- 按钮 ---- */
+  Array.prototype.forEach.call(zoomBtns, function (b) {
+    b.addEventListener('click', function () {
+      var z = b.getAttribute('data-zoom');
+      if (z === 'reset') { reset(); return; }
+      smooth(function () { zoomTo(z === 'in' ? scale * 1.6 : scale / 1.6, 0, 0); });
+    });
+  });
+  closeBtn.addEventListener('click', function () { closeViewer(); });
+
+  /* ---- 开关弹层 ----
+     滚动锁的解除挂了多个事件：close() 派发 close 事件是异步的，
+     只靠它会在关闭那一拍留下仍锁着页面的窗口；Esc 走的是 cancel。
+     同步路径（关闭按钮、点空白、Esc 的 keydown）都顺手解锁，异步事件只作兜底。 */
+  function unlock() { document.documentElement.classList.remove('viewer-open'); }
+  function closeViewer() { dlg.close(); unlock(); }
+
+  entry.addEventListener('click', function (e) {
+    // 只接普通左键单击；带修饰键或中键的点击交给链接默认行为（新窗口打开）
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) { return; }
+    e.preventDefault();
+    dlg.showModal();
+    document.documentElement.classList.add('viewer-open');
+    /* 同步量基准尺寸：showModal() 之后弹层已完成布局，读一次就能拿到。
+       早先放在 requestAnimationFrame 里，出现过竞态——回调晚于用户第一次点「＋」，
+       量完顺手把缩放重置回 100%，用户那一按就白按了。 */
+    measure();
+    scale = 1; tx = 0; ty = 0;
+    render();
+  });
+  dlg.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { unlock(); }   // 不依赖异步的 close 事件
+  });
+  dlg.addEventListener('cancel', unlock);
+  dlg.addEventListener('close', unlock);
+  window.addEventListener('resize', function () {
+    if (!dlg.open) { return; }
+    measure(); render();
+  });
+
+  /* ---- 点深色空白处关闭（拖拽收尾那一下不算，否则一拖完就关掉）---- */
+  dlg.addEventListener('click', function (e) {
+    var onBlank = (e.target === dlg || e.target === stage);
+    if (onBlank && !moved) { closeViewer(); }
+    moved = false;
+  });
+
+  /* ---- 滚轮缩放（桌面微信、触控板）---- */
+  stage.addEventListener('wheel', function (e) {
+    if (!dlg.open) { return; }
+    e.preventDefault();
+    var v = stageOffset(e.clientX, e.clientY);
+    zoomTo(scale * Math.exp(-e.deltaY * 0.0015), v.x, v.y);
+  }, { passive: false });
+
+  /* ---- 双击 / 双击屏幕：在「适应屏幕」与 2.5 倍之间来回 ---- */
+  stage.addEventListener('dblclick', function (e) {
+    var v = stageOffset(e.clientX, e.clientY);
+    smooth(function () { zoomTo(scale > 1.01 ? 1 : 2.5, v.x, v.y); });
+  });
+
+  /* ---- 指针手势：单指拖动、双指缩放（Pointer Events 同时覆盖鼠标与触摸）---- */
+  var ptrs = new Map();
+  var startDist = 0, startScale = 1, startMid = null, startTx = 0, startTy = 0;
+  var downAt = null;
+
+  function list() { var a = []; ptrs.forEach(function (p) { a.push(p); }); return a; }
+  function midpoint() { var a = list(); return { x: (a[0].x + a[1].x) / 2, y: (a[0].y + a[1].y) / 2 }; }
+  function spread() { var a = list(); return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); }
+
+  stage.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) { return; }
+    img.classList.remove('is-smooth');
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 1) { downAt = { x: e.clientX, y: e.clientY }; moved = false; stage.classList.add('is-panning'); }
+    try { stage.setPointerCapture(e.pointerId); } catch (err) { /* 捕获失败不影响拖动 */ }
+    if (ptrs.size === 2) {
+      startDist = spread();
+      startScale = scale;
+      startMid = midpoint();
+      startTx = tx; startTy = ty;
+    }
+  });
+
+  stage.addEventListener('pointermove', function (e) {
+    if (!ptrs.has(e.pointerId)) { return; }
+    var prev = ptrs.get(e.pointerId);
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // 位移超过 6px 才算拖拽，避免手指轻微抖动把「点空白关闭」吃掉
+    if (downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 6) { moved = true; }
+
+    if (ptrs.size === 1) {
+      tx += e.clientX - prev.x;
+      ty += e.clientY - prev.y;
+      render();
+    } else if (ptrs.size === 2 && startDist > 0) {
+      var d = spread();
+      var to = Math.min(MAX, Math.max(MIN, startScale * (d / startDist)));
+      var m = midpoint();
+      var k = to / startScale;
+      // 以两指起点中点为锚点缩放，同时整体跟随中点平移
+      tx = startMid.x - k * (startMid.x - startTx) + (m.x - startMid.x);
+      ty = startMid.y - k * (startMid.y - startTy) + (m.y - startMid.y);
+      scale = to;
+      render();
+    }
+  });
+
+  function endPtr(e) {
+    ptrs.delete(e.pointerId);
+    if (ptrs.size < 2) { startDist = 0; }
+    if (ptrs.size === 0) { stage.classList.remove('is-panning'); }
+  }
+  stage.addEventListener('pointerup', endPtr);
+  stage.addEventListener('pointercancel', endPtr);
+
+  /* 首屏渲染完之后再预取二维码图：既不拖慢首屏，打开弹层时也不会空白 */
+  window.addEventListener('load', function () {
+    var pre = new Image();
+    pre.src = './group-qr.png';
+  });
+})();
+</script>
 
 </body>
 </html>
