@@ -131,6 +131,51 @@
   /* 每个日期各自成为一个不可断开的单位，换行只发生在标点处 */
   .when .d{white-space:nowrap;}
 
+  /* ================= 投票倒计时（大时钟） =================
+     开始前倒数到开始，开始后倒数到截止，截止后收起数字换成一句结束语。
+     目标时刻写在元素的 data-start / data-end 上，并且带 +08:00 时区偏移——
+     算的是 UTC 绝对时刻，海外业主的设备时区不同也能算对。
+     没有脚本时整块保持 hidden：首屏那行静态起止时间仍在，信息不会丢。 */
+  .clock{
+    margin-top:20px;
+    max-width:34em;
+    padding:16px 16px 18px;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:16px;
+    background:rgba(255,255,255,.10);
+    text-align:center;
+  }
+  .clock-label{
+    font-size:15.5px;
+    letter-spacing:.04em;
+    color:#CFE6F4;
+  }
+  .clock-digits{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:clamp(8px,4vw,22px);
+    margin-top:6px;
+  }
+  .clock-digits .u{display:flex;align-items:baseline;gap:3px;}
+  .clock-digits b{
+    font-size:clamp(30px,9.6vw,46px);
+    line-height:1.05;
+    font-weight:700;
+    color:#fff;
+    /* 等宽数字：秒数跳动时整行不会左右抖 */
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+    text-shadow:0 1px 12px rgba(0,0,0,.35);
+  }
+  .clock-digits i{font-style:normal;font-size:14px;color:#BFDCEC;}
+  .clock-done{
+    margin-top:4px;
+    font-size:clamp(19px,5.4vw,25px);
+    font-weight:700;
+    color:#fff;
+  }
+
   /* ================= 入口列表 =================
      长者为主，一行一扇门：编号 → 标题 → 一句话说明 → 箭头。
      触摸目标高度不低于 92px，标题 19px 起。 */
@@ -485,6 +530,21 @@
     <h1>业主大会信息总览</h1>
     <p class="lead">本次业主大会的公告、投票指引、委托办法和相关资料，都从这里进。</p>
     <p class="when"><b>投票通道</b>：<span class="d">2026 年 9 月 15 日 10:00 开放</span>，<span class="d">10 月 15 日 10:00 截止</span>，逾期无法补投。</p>
+
+    <!-- 倒计时。起止时刻只写在这里（带 +08:00），要改日期就改这两个属性，
+         脚本会自己判断处于「开始前 / 进行中 / 已截止」哪个阶段。 -->
+    <div class="clock" id="voteClock" hidden
+         data-start="2026-09-15T10:00:00+08:00"
+         data-end="2026-10-15T10:00:00+08:00">
+      <p class="clock-label" id="clockLabel">距投票开始还有</p>
+      <p class="clock-digits" id="clockDigits" role="timer">
+        <span class="u"><b id="cdD">0</b><i>天</i></span>
+        <span class="u"><b id="cdH">00</b><i>时</i></span>
+        <span class="u"><b id="cdM">00</b><i>分</i></span>
+        <span class="u"><b id="cdS">00</b><i>秒</i></span>
+      </p>
+      <p class="clock-done" id="clockDone" hidden></p>
+    </div>
   </div>
 </header>
 
@@ -566,7 +626,7 @@
 <!-- ================= 页脚 ================= -->
 <footer class="foot">
   <p class="disclaim">本页由小区业主自行整理，仅在本小区业主范围内传阅，<b>不是政府或粤省事官方发布的文件</b>。</p>
-  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.10</p>
+  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.11</p>
 </footer>
 <!-- ================= 二维码查看器 =================
      用原生 <dialog>：showModal() 自带焦点陷阱和 Esc 关闭，且渲染在顶层，不必操心 z-index。
@@ -791,6 +851,83 @@
     var pre = new Image();
     pre.src = './group-qr.png';
   });
+})();
+
+/* ================= 投票倒计时 =================
+   三个阶段：开始前倒数到开始 → 进行中倒数到截止 → 已截止收起数字。
+   目标时刻取自 data-start / data-end（带 +08:00 偏移），比较的是 UTC 绝对时刻，
+   所以设备时区怎么设都不影响结果——这一条对海外业主很重要。 */
+(function () {
+  var box = document.getElementById('voteClock');
+  if (!box) { return; }
+
+  var START = Date.parse(box.getAttribute('data-start'));
+  var END   = Date.parse(box.getAttribute('data-end'));
+  // 日期写坏了就整块不显示：宁可没有倒计时，也不要显示一个错的
+  if (isNaN(START) || isNaN(END) || START >= END) { return; }
+
+  var label = document.getElementById('clockLabel');
+  var digits = document.getElementById('clockDigits');
+  var doneEl = document.getElementById('clockDone');
+  var dEl = document.getElementById('cdD'), hEl = document.getElementById('cdH');
+  var mEl = document.getElementById('cdM'), sEl = document.getElementById('cdS');
+  var timer = null;
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  /* 按北京时间把绝对时刻写成「9 月 15 日 10:00」。
+     结束语由 data-end 现算，而不是写死在 HTML 里——
+     否则哪天改了 data-end，这句文案就会跟着过期，是很典型的漏改点。 */
+  function fmtCN(ts) {
+    var f = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+    var p = {};
+    f.formatToParts(ts).forEach(function (x) { p[x.type] = x.value; });
+    return p.month + ' 月 ' + p.day + ' 日 ' + p.hour + ':' + p.minute;
+  }
+
+  // 返回当前阶段，调用方据此决定还要不要继续计时
+  function paint() {
+    var now = Date.now();
+    var phase = now < START ? 'before' : (now < END ? 'during' : 'after');
+    var ended = (phase === 'after');
+
+    label.hidden = ended;
+    digits.hidden = ended;
+    doneEl.hidden = !ended;
+    if (ended) {
+      label.textContent = '';   // 收起了就别在 DOM 里留一句过期的「距…还有」
+      doneEl.textContent = '投票已于 ' + fmtCN(END) + ' 截止';
+      return phase;
+    }
+
+    label.textContent = (phase === 'before') ? '距投票开始还有' : '距投票截止还有';
+
+    var sec = Math.floor(((phase === 'before' ? START : END) - now) / 1000);
+    dEl.textContent = Math.floor(sec / 86400);
+    hEl.textContent = pad(Math.floor(sec % 86400 / 3600));
+    mEl.textContent = pad(Math.floor(sec % 3600 / 60));
+    sEl.textContent = pad(sec % 60);
+    return phase;
+  }
+
+  function tick() {
+    if (paint() === 'after') { timer = null; return; }   // 截止后彻底停掉，不空转
+    // 对齐到下一个整秒再刷新：秒数跳得干脆，长时间也不会累积漂移
+    timer = window.setTimeout(tick, 1000 - (Date.now() % 1000) + 8);
+  }
+
+  // 切到后台时定时器会被浏览器节流，切回来立刻补一次，避免停在旧数字上
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden || timer === null) { return; }
+    window.clearTimeout(timer);
+    tick();
+  });
+
+  box.hidden = false;   // 只有脚本正常跑起来，这一块才出现
+  tick();
 })();
 </script>
 
