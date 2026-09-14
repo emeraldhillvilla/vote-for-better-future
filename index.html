@@ -105,7 +105,9 @@
   }
   h1{
     margin:16px 0 0;
-    font-size:clamp(27px,7.6vw,44px);
+    /* 手机端原来 7.6vw（约 390px 宽时 30px）压得太满，收一档到 6.8vw（约 26px）；
+       上限 44→42px，桌面端基本看不出变化 */
+    font-size:clamp(25px,6.8vw,42px);
     line-height:1.24;
     letter-spacing:.01em;
     font-weight:700;
@@ -159,7 +161,9 @@
   }
   .clock-digits .u{display:flex;align-items:baseline;gap:3px;}
   .clock-digits b{
-    font-size:clamp(30px,9.6vw,46px);
+    /* 手机端原来 9.6vw（约 400px 宽时 38px）偏大，降一档到 8.2vw（约 33px）；
+       上限 46→43px，桌面端几乎看不出差别 */
+    font-size:clamp(26px,8.2vw,43px);
     line-height:1.05;
     font-weight:700;
     color:#fff;
@@ -168,7 +172,8 @@
     font-feature-settings:"tnum" 1;
     text-shadow:0 1px 12px rgba(0,0,0,.35);
   }
-  .clock-digits i{font-style:normal;font-size:14px;color:#BFDCEC;}
+  /* 单位字随数字一起收一点，保持「数字大、单位小」的层级比例 */
+  .clock-digits i{font-style:normal;font-size:clamp(12px,3.3vw,14px);color:#BFDCEC;}
   .clock-done{
     margin-top:4px;
     font-size:clamp(19px,5.4vw,25px);
@@ -626,7 +631,7 @@
 <!-- ================= 页脚 ================= -->
 <footer class="foot">
   <p class="disclaim">本页由小区业主自行整理，仅在本小区业主范围内传阅，<b>不是政府或粤省事官方发布的文件</b>。</p>
-  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.11</p>
+  <p class="ver">更新日期 2026 年 9 月 14 日 · 总入口版本 v1.12</p>
 </footer>
 <!-- ================= 二维码查看器 =================
      用原生 <dialog>：showModal() 自带焦点陷阱和 Esc 关闭，且渲染在顶层，不必操心 z-index。
